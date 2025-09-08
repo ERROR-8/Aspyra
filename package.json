@@ -1,5 +1,5 @@
 {
-  "name": "carrier_nest",
+  "name": "career_nest",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ERROR-8/Carrier_Nest.git"
+    "url": "git+https://github.com/ERROR-8/Career_Nest.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/ERROR-8/Carrier_Nest/issues"
+    "url": "https://github.com/ERROR-8/Career_Nest/issues"
   },
-  "homepage": "https://github.com/ERROR-8/Carrier_Nest#readme"
+  "homepage": "https://github.com/ERROR-8/Career_Nest#readme"
 }
