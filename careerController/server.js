@@ -3,6 +3,7 @@ const cors = require(`cors`);
 const dotenv = require(`dotenv`);
 const connectdb = require(`./config/db`);
 const jobsroute = require("./routes/jobRoutes");
+
 const app = express();
 dotenv.config();
 connectdb();
@@ -18,4 +19,5 @@ app.listen(port,() => {
 app.get("/",(req,res) => {
     res.send("Welcome");
 });
+
 app.use("/api/job", jobsroute);
