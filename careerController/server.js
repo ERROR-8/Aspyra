@@ -2,7 +2,9 @@ const express = require(`express`);
 const cors = require(`cors`);
 const dotenv = require(`dotenv`);
 const connectdb = require(`./config/db`);
-const jobsroute = require("./routes/jobRoutes");
+const jobsroute = require(`./routes/jobRoutes`);
+const userroute = require(`./routes/userRoutes`);
+const companyroute = require(`./routes/companyRoutes`);
 
 const app = express();
 dotenv.config();
@@ -17,7 +19,9 @@ app.listen(port,() => {
 });
 
 app.get("/",(req,res) => {
-    res.send("Welcome");
+    res.send(`Welcome`);
 });
 
 app.use("/api/job", jobsroute);
+app.use("/api/user",userroute);
+app.use("/api/company",companyroute);
