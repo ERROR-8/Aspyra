@@ -5,6 +5,7 @@ const connectdb = require(`./config/db`);
 const jobsroute = require(`./routes/jobRoutes`);
 const userroute = require(`./routes/userRoutes`);
 const companyroute = require(`./routes/companyRoutes`);
+const applicationroute = require(`./routes/applicationRoutes`);
 
 const app = express();      //package call
 dotenv.config();
@@ -25,3 +26,4 @@ app.get("/",(req,res) => {
 app.use("/api/job", jobsroute);     //Use and routing
 app.use("/api/user",userroute);
 app.use("/api/company",companyroute);
+app.use("/api/application",applicationroute);
