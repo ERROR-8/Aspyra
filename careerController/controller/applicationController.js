@@ -1,4 +1,4 @@
-const Application = require(`../modules/application`);
+const Application = require(`../modules/application`);      //Application control API
 
 exports.createApplication = async(req,res) => {
     try{

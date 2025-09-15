@@ -1,4 +1,4 @@
-const mongoose = require(`mongoose`);
+const mongoose = require(`mongoose`); //application Schema
 
 const applicationSchema = new mongoose.Schema({
     JobTitle: { type: String, required: true},

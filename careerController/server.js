@@ -1,4 +1,4 @@
-const express = require(`express`);
+const express = require(`express`);     //package import
 const cors = require(`cors`);
 const dotenv = require(`dotenv`);
 const connectdb = require(`./config/db`);
@@ -6,7 +6,7 @@ const jobsroute = require(`./routes/jobRoutes`);
 const userroute = require(`./routes/userRoutes`);
 const companyroute = require(`./routes/companyRoutes`);
 
-const app = express();
+const app = express();      //package call
 dotenv.config();
 connectdb();
 
@@ -22,6 +22,6 @@ app.get("/",(req,res) => {
     res.send(`Welcome`);
 });
 
-app.use("/api/job", jobsroute);
+app.use("/api/job", jobsroute);     //Use and routing
 app.use("/api/user",userroute);
 app.use("/api/company",companyroute);

@@ -1,4 +1,4 @@
-const userSchema = require(`../modules/user`);
+const userSchema = require(`../modules/user`);      //User control API
 
 exports.createUser = async(req,res) =>{
     try{

@@ -1,4 +1,4 @@
-const express = require(`express`);
+const express = require(`express`);     //Job Route
 const router = express.Router();
 const jctrl = require(`../controller/jobController`);
 
