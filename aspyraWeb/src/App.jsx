@@ -3,13 +3,12 @@ import { SidebarProvider } from './context/SidebarContext';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Home from './pages/Home';
+ 
 import Dashboard from './pages/Dashboard';
 import JobManagement from './pages/JobManagement';
 import UserManagement from './pages/UserManagement';
 import CompanyProfiles from './pages/CompanyProfiles';
 import ReportsAnalytics from './pages/ReportsAnalytics';
-import SupportFeedback from './pages/SupportFeedback';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import './App.css';
@@ -26,13 +25,12 @@ function App() {
         <Route path="/*" element={
           <Layout>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/job-management" element={<JobManagement />} />
               <Route path="/user-management" element={<UserManagement />} />
               <Route path="/company-profiles" element={<CompanyProfiles />} />
               <Route path="/reports" element={<ReportsAnalytics />} />
-              <Route path="/support" element={<SupportFeedback />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />
             </Routes>

@@ -1,14 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from '../../context/SidebarContext';
 import { 
-  FaHome, 
   FaChartLine, 
   FaBriefcase, 
   FaBuilding, 
   FaUsers, 
   FaFileAlt,
   FaChartBar,
-  FaHeadset,
   FaCog,
   FaSignOutAlt,
   FaArrowUp,
@@ -21,7 +19,6 @@ const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/', icon: FaHome, label: 'Home' },
     { path: '/dashboard', icon: FaChartLine, label: 'Dashboard' },
     { path: '/job-management', icon: FaBriefcase, label: 'Job Management' },
     { path: '/company-profiles', icon: FaBuilding, label: 'Company Profiles' },
@@ -30,7 +27,6 @@ const Sidebar = () => {
   ];
 
   const bottomMenuItems = [
-    { path: '/support', icon: FaHeadset, label: 'Support / Feedback' },
     { path: '/settings', icon: FaCog, label: 'Settings' },
   ];
 

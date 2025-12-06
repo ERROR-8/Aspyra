@@ -1,7 +1,7 @@
 import { FaPlus, FaCheck, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 import './JobManagement.css';
 import { useEffect, useState } from 'react';
-import { getJobs, createJob } from '../api/jobs';
+import { getJobs, createJob, updateJob, deleteJob } from '../api/jobs';
 
 const JobManagement = () => {
   const [jobs, setJobs] = useState([]);
@@ -60,12 +60,13 @@ const JobManagement = () => {
   // keep initial load behavior
   useEffect(() => { loadJobs(); }, []);
 
-  const [showCreate, setShowCreate] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ JobsName: '', JobsType: '', JobDesc: '', Requirements: '', Location: '', Salary: '' });
-  const [message, setMessage] = useState(null);
-
-  const openCreate = () => { setMessage(null); setShowCreate(true); };
+const [showCreate, setShowCreate] = useState(false);
+const [submitting, setSubmitting] = useState(false);
+const [form, setForm] = useState({ JobsName: '', JobsType: '', JobDesc: '', Requirements: '', Location: '', Salary: '', CompanyName: '' });
+const [message, setMessage] = useState(null);
+const [editId, setEditId] = useState(null);
+const [editForm, setEditForm] = useState({ JobsName: '', JobsType: '', JobDesc: '', Requirements: '', Location: '', Salary: '', CompanyName: '' });
+const [editSubmitting, setEditSubmitting] = useState(false);  const openCreate = () => { setMessage(null); setShowCreate(true); };
   const closeCreate = () => { setShowCreate(false); setForm({ JobsName: '', JobsType: '', JobDesc: '', Requirements: '', Location: '', Salary: '' }); };
 
   const handleChange = (e) => {
@@ -105,6 +106,72 @@ const JobManagement = () => {
       setMessage(serverMsg || 'Failed to create job');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const startEdit = (job) => {
+    setEditId(job.id);
+    setEditForm({
+      JobsName: job.title || '',
+      JobsType: job.type || '',
+      JobDesc: job.description || '',
+      Requirements: job.Requirements || '',
+      Location: job.location || '',
+      Salary: job.salary ? String(job.salary).replace(/[^\d.]/g, '') : '',
+      CompanyName: job.company || ''
+    });
+    setMessage(null);
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setEditForm({ JobsName: '', JobsType: '', JobDesc: '', Requirements: '', Location: '', Salary: '', CompanyName: '' });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditSubmitting(true);
+    setMessage(null);
+    const missing = [];
+    if (!editForm.JobsName) missing.push('Job Title');
+    if (!editForm.JobsType) missing.push('Job Type');
+    if (!editForm.JobDesc) missing.push('Description');
+    if (!editForm.Requirements) missing.push('Requirements');
+    if (!editForm.Location) missing.push('Location');
+    if (missing.length) {
+      setMessage('Please provide: ' + missing.join(', '));
+      setEditSubmitting(false);
+      return;
+    }
+    try {
+      const payload = { ...editForm, Salary: editForm.Salary ? Number(editForm.Salary) : 0 };
+      await updateJob(editId, payload);
+      setMessage('Job updated successfully');
+      cancelEdit();
+      loadJobs();
+    } catch (err) {
+      const serverMsg = err?.response?.data?.error || err?.response?.data || err?.message;
+      setMessage(serverMsg || 'Failed to update job');
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this job?')) return;
+    setMessage(null);
+    try {
+      await deleteJob(id);
+      setMessage('Job deleted successfully');
+      loadJobs();
+    } catch (err) {
+      const serverMsg = err?.response?.data?.error || err?.response?.data || err?.message;
+      setMessage(serverMsg || 'Failed to delete job');
     }
   };
 
@@ -216,43 +283,79 @@ const JobManagement = () => {
             </thead>
             <tbody>
               {jobs.map(job => (
-                <tr key={job.id}>
-                  <td>
-                    <div className="job-name-cell">
-                      <h6 className="job-title-text">{job.title}</h6>
-                      <p className="job-description">{job.description}</p>
-                    </div>
-                  </td>
-                  <td>{job.company}</td>
-                  <td>{job.location}</td>
-                  <td className="salary-cell">{job.salary}</td>
-                  <td>{job.type}</td>
-                  <td>
-                    <span className={`badge status-badge status-${job.statusColor}`}>
-                      {job.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      {job.status === 'Pending Approval' && (
-                        <>
-                          <button className="btn-icon btn-success" title="Approve">
-                            <FaCheck />
-                          </button>
-                          <button className="btn-icon btn-danger" title="Reject">
-                            <FaTimes />
-                          </button>
-                        </>
-                      )}
-                      <button className="btn-icon btn-primary" title="Edit">
-                        <FaEdit />
-                      </button>
-                      <button className="btn-icon btn-danger" title="Delete">
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                editId === job.id ? (
+                  <tr key={job.id}>
+                    <td colSpan={7}>
+                      <form onSubmit={handleEditSubmit} className="edit-job-form">
+                        <div className="row g-2">
+                          <div className="col-md-2">
+                            <input name="JobsName" value={editForm.JobsName} onChange={handleEditChange} className="form-control" placeholder="Job Title" required />
+                          </div>
+                          <div className="col-md-2">
+                            <input name="CompanyName" value={editForm.CompanyName} onChange={handleEditChange} className="form-control" placeholder="Company" />
+                          </div>
+                          <div className="col-md-2">
+                            <input name="Location" value={editForm.Location} onChange={handleEditChange} className="form-control" placeholder="Location" />
+                          </div>
+                          <div className="col-md-1">
+                            <input name="Salary" value={editForm.Salary} onChange={handleEditChange} className="form-control" placeholder="Salary" />
+                          </div>
+                          <div className="col-md-1">
+                            <input name="JobsType" value={editForm.JobsType} onChange={handleEditChange} className="form-control" placeholder="Type" />
+                          </div>
+                          <div className="col-md-2">
+                            <input name="Requirements" value={editForm.Requirements} onChange={handleEditChange} className="form-control" placeholder="Requirements" />
+                          </div>
+                          <div className="col-md-2 d-flex gap-2">
+                            <button className="btn btn-success btn-sm" type="submit" disabled={editSubmitting}>{editSubmitting ? 'Saving...' : 'Save'}</button>
+                            <button className="btn btn-secondary btn-sm" type="button" onClick={cancelEdit}>Cancel</button>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <textarea name="JobDesc" value={editForm.JobDesc} onChange={handleEditChange} className="form-control" placeholder="Description" />
+                        </div>
+                      </form>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={job.id}>
+                    <td>
+                      <div className="job-name-cell">
+                        <h6 className="job-title-text">{job.title}</h6>
+                        <p className="job-description">{job.description}</p>
+                      </div>
+                    </td>
+                    <td>{job.company}</td>
+                    <td>{job.location}</td>
+                    <td className="salary-cell">{job.salary}</td>
+                    <td>{job.type}</td>
+                    <td>
+                      <span className={`badge status-badge status-${job.statusColor}`}>
+                        {job.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        {job.status === 'Pending Approval' && (
+                          <>
+                            <button className="btn-icon btn-success" title="Approve">
+                              <FaCheck />
+                            </button>
+                            <button className="btn-icon btn-danger" title="Reject">
+                              <FaTimes />
+                            </button>
+                          </>
+                        )}
+                        <button className="btn-icon btn-primary" title="Edit" onClick={() => startEdit(job)}>
+                          <FaEdit />
+                        </button>
+                        <button className="btn-icon btn-danger" title="Delete" onClick={() => handleDelete(job.id)}>
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
               ))}
             </tbody>
           </table>

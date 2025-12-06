@@ -3,55 +3,117 @@ import {
   FaUserPlus, FaCheckCircle, FaFilePdf, FaFileExcel 
 } from 'react-icons/fa';
 import './ReportsAnalytics.css';
+import { useEffect, useState } from 'react';
+import { getJobs } from '../api/jobs';
+import { getCompanies } from '../api/companies';
+import { getUsers } from '../api/users';
+import { getApplications } from '../api/applications';
 
 const ReportsAnalytics = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [jobsCount, setJobsCount] = useState(0);
+  const [applicationsCount, setApplicationsCount] = useState(0);
+  const [companiesCount, setCompaniesCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      getJobs().catch(() => []),
+      getApplications().catch(() => []),
+      getCompanies().catch(() => []),
+      getUsers().catch(() => [])
+    ])
+      .then(([jobs, apps, companies, users]) => {
+        setJobsCount((jobs || []).length);
+        setApplicationsCount((apps || []).length);
+        setCompaniesCount((companies || []).length);
+        setUsersCount((users || []).length);
+
+        // Generate activities from real data
+        const acts = [];
+        if (jobs && jobs.length > 0) {
+          const recentJob = jobs[0];
+          acts.push({
+            icon: FaPlus,
+            iconColor: '#22c55e',
+            text: `New job posted: "${recentJob.JobsName || 'Untitled'}"`,
+            time: 'Recently added'
+          });
+        }
+        if (companies && companies.length > 0) {
+          const recentCompany = companies[0];
+          acts.push({
+            icon: FaUserPlus,
+            iconColor: '#4f46e5',
+            text: `New company registered: "${recentCompany.CompanyName || 'Untitled'}"`,
+            time: 'Recently added'
+          });
+        }
+        if (apps && apps.length > 0) {
+          acts.push({
+            icon: FaCheckCircle,
+            iconColor: '#a855f7',
+            text: `${apps.length} application(s) in the system`,
+            time: 'Updated'
+          });
+        }
+        if (users && users.length > 0) {
+          const recentUser = users[0];
+          acts.push({
+            icon: FaUserPlus,
+            iconColor: '#f59e0b',
+            text: `New user registered: "${recentUser.FullName || 'User'}"`,
+            time: 'Recently added'
+          });
+        }
+        setActivities(acts.length > 0 ? acts : [
+          {
+            icon: FaFileAlt,
+            iconColor: '#9ca3af',
+            text: 'No recent activity',
+            time: 'N/A'
+          }
+        ]);
+      })
+      .catch((err) => {
+        console.error('Failed to load analytics data', err);
+        setError('Error loading analytics');
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const metrics = [
     {
       title: 'Jobs Posted',
-      value: '1,250',
-      change: '↑ 15% last month',
+      value: jobsCount.toLocaleString(),
+      change: '↑ Updated from backend',
       changeType: 'positive',
       icon: FaBriefcase,
       iconColor: '#4f46e5'
     },
     {
       title: 'Applications Received',
-      value: '34,890',
-      change: '↑ 22% last month',
+      value: applicationsCount.toLocaleString(),
+      change: '↑ Updated from backend',
       changeType: 'positive',
       icon: FaFileAlt,
       iconColor: '#22c55e'
     },
     {
       title: 'Active Companies',
-      value: '312',
-      change: '↓ 2% last month',
-      changeType: 'negative',
+      value: companiesCount.toLocaleString(),
+      change: `Total: ${companiesCount}`,
+      changeType: 'positive',
       icon: FaBuilding,
       iconColor: '#a855f7'
     }
   ];
 
-  const activities = [
-    {
-      icon: FaPlus,
-      iconColor: '#22c55e',
-      text: 'New job posted: "Senior Frontend Developer"',
-      time: '2 hours ago'
-    },
-    {
-      icon: FaUserPlus,
-      iconColor: '#4f46e5',
-      text: 'New company registered: "Innovate Inc."',
-      time: '1 day ago'
-    },
-    {
-      icon: FaCheckCircle,
-      iconColor: '#a855f7',
-      text: 'Monthly application report downloaded.',
-      time: '3 days ago'
-    }
-  ];
+  if (loading) return <div className="reports-page">Loading analytics...</div>;
+  if (error) return <div className="reports-page">Error: {error}</div>;
 
   return (
     <div className="reports-page">

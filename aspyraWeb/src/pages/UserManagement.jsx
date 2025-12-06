@@ -1,12 +1,91 @@
 import { FaEye, FaEdit, FaBan, FaTimes, FaUserPlus, FaFilter, FaSort } from 'react-icons/fa';
 import './UserManagement.css';
 import { useEffect, useState } from 'react';
-import { getUsers, createUser } from '../api/users';
+import { getUsers, createUser, updateUser, deleteUser } from '../api/users';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [showCreate, setShowCreate] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    FullName: '',
+    Email: '',
+    PhoneNo: '',
+    Address: '',
+    Pincode: '',
+    Password: ''
+  });
+  const [message, setMessage] = useState(null);
+
+  const startEdit = (user) => {
+    setEditingId(user.id);
+    setEditForm({
+      id: user.id,
+      FullName: user.name,
+      Email: user.email,
+      PhoneNo: user.phone,
+      Address: user.location,
+      Pincode: ''
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setMessage(null);
+    const missing = [];
+    if (!editForm.FullName) missing.push('Full Name');
+    if (!editForm.Email) missing.push('Email');
+    if (!editForm.PhoneNo) missing.push('Phone No');
+    if (!editForm.Address) missing.push('Address');
+    if (missing.length) {
+      setMessage('Please provide: ' + missing.join(', '));
+      return;
+    }
+    try {
+      const payload = { 
+        FullName: editForm.FullName,
+        Email: editForm.Email,
+        PhoneNo: Number(editForm.PhoneNo),
+        Address: editForm.Address,
+        Pincode: editForm.Pincode ? Number(editForm.Pincode) : undefined
+      };
+      await updateUser(editForm.id, payload);
+      setMessage('User updated successfully');
+      cancelEdit();
+      loadUsers();
+    } catch (err) {
+      console.error('Update user failed', err);
+      const serverMsg = err?.response?.data?.error || err?.response?.data || err?.message;
+      setMessage(serverMsg || 'Failed to update user');
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await deleteUser(userId);
+      setMessage('User deleted successfully');
+      loadUsers();
+    } catch (err) {
+      console.error('Delete user failed', err);
+      const serverMsg = err?.response?.data?.error || err?.response?.data || err?.message;
+      setMessage(serverMsg || 'Failed to delete user');
+    }
+  };
 
   const loadUsers = () => {
     setLoading(true);
@@ -32,18 +111,6 @@ const UserManagement = () => {
   };
 
   useEffect(() => { loadUsers(); }, []);
-
-  const [showCreate, setShowCreate] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    FullName: '',
-    Email: '',
-    PhoneNo: '',
-    Address: '',
-    Pincode: '',
-    Password: ''
-  });
-  const [message, setMessage] = useState(null);
 
   const openCreate = () => { setMessage(null); setShowCreate(true); };
   const closeCreate = () => { setShowCreate(false); setForm({ FullName: '', Email: '', PhoneNo: '', Address: '', Pincode: '', Password: '' }); };
@@ -85,36 +152,23 @@ const UserManagement = () => {
     }
   };
 
-  const getActionButtons = (status) => {
+  const getActionButtons = (user, status) => {
     if (status === 'Active' || status === 'Suspicious') {
       return (
         <>
           <button className="btn-icon btn-primary" title="View Profile">
             <FaEye />
           </button>
-          <button className="btn-icon btn-warning" title="Edit">
+          <button className="btn-icon btn-warning" title="Edit" onClick={() => startEdit(user)}>
             <FaEdit />
           </button>
-          <button className="btn-icon btn-danger" title="Ban User">
+          <button className="btn-icon btn-danger" title="Delete" onClick={() => handleDelete(user.id)}>
             <FaBan />
           </button>
         </>
       );
-    } else if (status === 'Banned' || status === 'Deactivated') {
-      return (
-        <>
-          <button className="btn-icon btn-secondary" title="View Profile (Disabled)">
-            <FaEye style={{ opacity: 0.5 }} />
-          </button>
-          <button className="btn-icon btn-danger" title="Delete">
-            <FaTimes />
-          </button>
-          <button className="btn-icon btn-success" title="Restore User">
-            <FaUserPlus />
-          </button>
-        </>
-      );
     }
+    return null;
   };
 
   if (loading) return <div className="user-management-page">Loading users...</div>;
@@ -197,6 +251,40 @@ const UserManagement = () => {
             </thead>
             <tbody>
               {users.map(user => (
+                editingId === user.id ? (
+                  <tr key={user.id} className="edit-row">
+                    <td colSpan="5">
+                      <form onSubmit={handleEditSubmit} className="edit-inline-form p-3">
+                        <div className="row g-2">
+                          <div className="col-md-2">
+                            <label className="form-label">Full Name</label>
+                            <input name="FullName" value={editForm.FullName} onChange={handleEditChange} className="form-control form-control-sm" required />
+                          </div>
+                          <div className="col-md-2">
+                            <label className="form-label">Email</label>
+                            <input name="Email" value={editForm.Email} onChange={handleEditChange} className="form-control form-control-sm" required />
+                          </div>
+                          <div className="col-md-2">
+                            <label className="form-label">Phone</label>
+                            <input name="PhoneNo" value={editForm.PhoneNo} onChange={handleEditChange} className="form-control form-control-sm" required />
+                          </div>
+                          <div className="col-md-3">
+                            <label className="form-label">Address</label>
+                            <input name="Address" value={editForm.Address} onChange={handleEditChange} className="form-control form-control-sm" required />
+                          </div>
+                          <div className="col-md-3">
+                            <label className="form-label">Pincode</label>
+                            <input name="Pincode" value={editForm.Pincode} onChange={handleEditChange} className="form-control form-control-sm" />
+                          </div>
+                        </div>
+                        <div className="mt-3 d-flex gap-2">
+                          <button type="submit" className="btn btn-sm btn-success">Save</button>
+                          <button type="button" className="btn btn-sm btn-secondary" onClick={cancelEdit}>Cancel</button>
+                        </div>
+                      </form>
+                    </td>
+                  </tr>
+                ) : (
                 <tr key={user.id}>
                   <td>
                     <div className="user-info">
@@ -218,10 +306,11 @@ const UserManagement = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      {getActionButtons(user.status)}
+                      {getActionButtons(user, user.status)}
                     </div>
                   </td>
                 </tr>
+                )
               ))}
             </tbody>
           </table>
@@ -229,7 +318,7 @@ const UserManagement = () => {
 
         {/* Pagination */}
         <div className="pagination-container">
-          <p className="pagination-info">Showing 1-5 of 25 users</p>
+          <p className="pagination-info">Showing 1-{Math.min(5, users.length)} of {users.length} users</p>
           <nav>
             <ul className="pagination">
               <li className="page-item disabled">

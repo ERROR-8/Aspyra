@@ -4,7 +4,7 @@ const SidebarContext = createContext();
 
 export const SidebarProvider = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeMenuItem, setActiveMenuItem] = useState('home');
+  const [activeMenuItem, setActiveMenuItem] = useState('dashboard');
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
