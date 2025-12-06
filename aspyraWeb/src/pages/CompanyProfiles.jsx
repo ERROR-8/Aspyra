@@ -1,136 +1,178 @@
 import { FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 import './CompanyProfiles.css';
+import { useEffect, useState } from 'react';
+import { getCompanies, createCompany } from '../api/companies';
 
 const CompanyProfiles = () => {
-  const companies = [
-    {
-      id: 1,
-      name: 'Innovate Inc.',
-      industry: 'Technology & AI',
-      location: 'San Francisco, CA',
-      logo: 'G',
-      logoColor: '#4285f4',
-      description: 'Innovate Inc. is a leading technology company specializing in artificial intelligence and machine learning solutions, driving innovation across various industries.',
-      tags: [
-        { name: 'AI', color: '#dbeafe' },
-        { name: 'SaaS', color: '#dcfce7' }
-      ],
-      rating: 4.8,
-      openPositions: [
-        'Senior AI Engineer',
-        'Product Designer',
-        'Data Scientist'
-      ]
-    },
-    {
-      id: 2,
-      name: 'QuantumLeap',
-      industry: 'Fintech',
-      location: 'New York, NY',
-      logo: 'amazon',
-      logoColor: '#ff9900',
-      description: 'QuantumLeap is revolutionizing the financial industry with blockchain technology and decentralized finance solutions.',
-      tags: [
-        { name: 'Fintech', color: '#fef3c7' },
-        { name: 'Blockchain', color: '#e5e7eb' }
-      ],
-      rating: 4.5,
-      openPositions: [
-        'Blockchain Developer',
-        'Marketing Manager'
-      ]
-    },
-    {
-      id: 3,
-      name: 'CreativeMinds',
-      industry: 'Design & Branding',
-      location: 'Remote',
-      logo: 'N',
-      logoColor: '#e50914',
-      description: 'A digital agency with a passion for creating beautiful, intuitive, and user-centric designs for brands worldwide.',
-      tags: [
-        { name: 'Design', color: '#fce7f3' },
-        { name: 'Branding', color: '#dbeafe' }
-      ],
-      rating: 5.0,
-      openPositions: [
-        'Lead UX Designer',
-        'Graphic Designer',
-        'Project Manager',
-        'Webflow Developer'
-      ]
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const loadCompanies = () => {
+    setLoading(true);
+    getCompanies()
+      .then((data) => {
+        const mapped = (data || []).map((c) => ({
+          id: c._id || c.id,
+          name: c.CompanyName || c.name,
+          industry: c.CompanyType || '',
+          location: c.CompanyAddress || '',
+          logo: c.CompanyName ? c.CompanyName.charAt(0) : '',
+          logoColor: '#4285f4',
+          description: `Type: ${c.CompanyNature || ''}`,
+          tags: [],
+          rating: 4.5,
+          openPositions: []
+        }));
+        setCompanies(mapped);
+      })
+      .catch((err) => {
+        console.error('Failed to load companies', err);
+        setError(err?.message || 'Error loading companies');
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { loadCompanies(); }, []);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    CompanyName: '',
+    RegistrationNo: '',
+    CompanyType: '',
+    CompanyNature: '',
+    CompanyAddress: '',
+    ContactNo: '',
+    Email: ''
+  });
+  const [message, setMessage] = useState(null);
+
+  const openCreate = () => { setMessage(null); setShowCreate(true); };
+  const closeCreate = () => { setShowCreate(false); setForm({ CompanyName: '', RegistrationNo: '', CompanyType: '', CompanyNature: '', CompanyAddress: '', ContactNo: '', Email: '' }); };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setMessage(null);
+    // Basic validation
+    const missing = [];
+    if (!form.CompanyName) missing.push('Company Name');
+    if (!form.RegistrationNo) missing.push('Registration No');
+    if (!form.CompanyType) missing.push('Company Type');
+    if (!form.CompanyNature) missing.push('Company Nature');
+    if (!form.CompanyAddress) missing.push('Company Address');
+    if (!form.ContactNo) missing.push('Contact No');
+    if (!form.Email) missing.push('Email');
+    if (missing.length) {
+      setMessage('Please provide: ' + missing.join(', '));
+      setSubmitting(false);
+      return;
     }
-  ];
+    try {
+      const payload = { ...form, ContactNo: Number(form.ContactNo) };
+      await createCompany(payload);
+      setMessage('Company created successfully');
+      closeCreate();
+      loadCompanies();
+    } catch (err) {
+      console.error('Create company failed', err);
+      const serverMsg = err?.response?.data?.error || err?.response?.data || err?.message;
+      setMessage(serverMsg || 'Failed to create company');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) return <div className="company-profiles-page">Loading companies...</div>;
+  if (error) return <div className="company-profiles-page">Error: {error}</div>;
 
   return (
     <div className="company-profiles-page">
       {/* Page Header */}
-      <div className="page-header-section mb-4">
+      <div className="page-header-section">
         <h1 className="page-title">Company Profiles</h1>
-        <p className="page-subtitle">Explore top companies and their job openings.</p>
+        <button className="btn btn-primary" onClick={openCreate}>
+          Add Company
+        </button>
       </div>
 
-      {/* Company Cards Grid */}
-      <div className="row g-4">
-        {companies.map(company => (
-          <div key={company.id} className="col-lg-4 col-md-6">
-            <div className="company-card">
-              {/* Company Header */}
-              <div className="company-header">
-                <div 
-                  className="company-logo-large"
-                  style={{ backgroundColor: company.logoColor + '20', color: company.logoColor }}
-                >
-                  {company.logo}
-                </div>
-                <div className="company-basic-info">
-                  <h3 className="company-name">{company.name}</h3>
-                  <p className="company-industry">{company.industry}</p>
-                  <p className="company-location">
-                    <FaMapMarkerAlt className="me-1" />
-                    {company.location}
-                  </p>
-                </div>
-              </div>
+      {message && <div className="alert alert-info mt-2">{message}</div>}
 
-              {/* Company Description */}
-              <p className="company-description">{company.description}</p>
-
-              {/* Tags and Rating */}
-              <div className="company-meta">
-                <div className="company-tags">
-                  {company.tags.map((tag, index) => (
-                    <span 
-                      key={index} 
-                      className="company-tag"
-                      style={{ backgroundColor: tag.color }}
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-                <div className="company-rating">
-                  <FaStar className="star-icon" />
-                  <span className="rating-value">{company.rating}</span>
-                </div>
-              </div>
-
-              {/* Open Positions */}
-              <div className="open-positions">
-                <h4 className="positions-title">
-                  Open Positions ({company.openPositions.length})
-                </h4>
-                <ul className="positions-list">
-                  {company.openPositions.map((position, index) => (
-                    <li key={index}>
-                      <a href="#" className="position-link">{position}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      {showCreate && (
+        <div className="create-company-form card p-3 mb-4">
+          <form onSubmit={handleCreate}>
+            <div className="mb-2">
+              <label className="form-label">Company Name</label>
+              <input name="CompanyName" value={form.CompanyName} onChange={handleChange} className="form-control" required />
             </div>
-          </div>
-        ))}
+            <div className="mb-2">
+              <label className="form-label">Registration No</label>
+              <input name="RegistrationNo" value={form.RegistrationNo} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Company Type</label>
+              <input name="CompanyType" value={form.CompanyType} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Company Nature</label>
+              <input name="CompanyNature" value={form.CompanyNature} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Company Address</label>
+              <input name="CompanyAddress" value={form.CompanyAddress} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Contact No</label>
+              <input name="ContactNo" value={form.ContactNo} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Email</label>
+              <input name="Email" value={form.Email} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="d-flex gap-2">
+              <button className="btn btn-success" type="submit" disabled={submitting}>{submitting ? 'Creating...' : 'Create'}</button>
+              <button className="btn btn-secondary" type="button" onClick={closeCreate}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Companies Table */}
+      <div className="table-container">
+        <div className="table-responsive">
+          <table className="table company-table">
+            <thead>
+              <tr>
+                <th>Company Name</th>
+                <th>Registration No</th>
+                <th>Type</th>
+                <th>Nature</th>
+                <th>Address</th>
+                <th>Contact No</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companies.map(company => (
+                <tr key={company.id}>
+                  <td>{company.name}</td>
+                  <td>{company.registrationNo || company.RegistrationNo || ''}</td>
+                  <td>{company.industry}</td>
+                  <td>{company.nature || company.CompanyNature || ''}</td>
+                  <td>{company.location}</td>
+                  <td>{company.contactNo || company.ContactNo || ''}</td>
+                  <td>{company.email || company.Email || ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

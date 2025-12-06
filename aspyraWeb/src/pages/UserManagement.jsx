@@ -1,59 +1,89 @@
 import { FaEye, FaEdit, FaBan, FaTimes, FaUserPlus, FaFilter, FaSort } from 'react-icons/fa';
 import './UserManagement.css';
+import { useEffect, useState } from 'react';
+import { getUsers, createUser } from '../api/users';
 
 const UserManagement = () => {
-  const users = [
-    {
-      id: 1,
-      name: 'Emily Carter',
-      location: 'New York, USA',
-      email: 'emily.carter@example.com',
-      phone: '(212) 555-0182',
-      status: 'Active',
-      statusColor: 'success',
-      avatar: 'EC'
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      location: 'San Francisco, USA',
-      email: 'michael.chen@example.com',
-      phone: '(415) 555-0132',
-      status: 'Suspicious',
-      statusColor: 'warning',
-      avatar: 'MC'
-    },
-    {
-      id: 3,
-      name: 'Sophia Rodriguez',
-      location: 'Miami, USA',
-      email: 'sophia.r@example.com',
-      phone: '(305) 555-0155',
-      status: 'Active',
-      statusColor: 'success',
-      avatar: 'SR'
-    },
-    {
-      id: 4,
-      name: 'David Lee',
-      location: 'Chicago, USA',
-      email: 'david.lee@example.com',
-      phone: '(312) 555-0199',
-      status: 'Banned',
-      statusColor: 'danger',
-      avatar: 'DL'
-    },
-    {
-      id: 5,
-      name: 'Jessica Miller',
-      location: 'Austin, USA',
-      email: 'jessica.m@example.com',
-      phone: '(512) 555-0112',
-      status: 'Deactivated',
-      statusColor: 'secondary',
-      avatar: 'JM'
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const loadUsers = () => {
+    setLoading(true);
+    getUsers()
+      .then((data) => {
+        const mapped = (data || []).map((u) => ({
+          id: u._id || u.id,
+          name: u.FullName || `${u.firstName || ''} ${u.lastName || ''}`.trim(),
+          location: u.Address || '',
+          email: u.Email || '',
+          phone: u.PhoneNo ? String(u.PhoneNo) : u.phone || '',
+          status: 'Active',
+          statusColor: 'success',
+          avatar: (u.FullName && u.FullName.split(' ').map(n=>n[0]).slice(0,2).join('')) || 'U'
+        }));
+        setUsers(mapped);
+      })
+      .catch((err) => {
+        console.error('Failed to load users', err);
+        setError(err?.message || 'Error loading users');
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { loadUsers(); }, []);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    FullName: '',
+    Email: '',
+    PhoneNo: '',
+    Address: '',
+    Pincode: '',
+    Password: ''
+  });
+  const [message, setMessage] = useState(null);
+
+  const openCreate = () => { setMessage(null); setShowCreate(true); };
+  const closeCreate = () => { setShowCreate(false); setForm({ FullName: '', Email: '', PhoneNo: '', Address: '', Pincode: '', Password: '' }); };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setMessage(null);
+    // Basic validation
+    const missing = [];
+    if (!form.FullName) missing.push('Full Name');
+    if (!form.Email) missing.push('Email');
+    if (!form.PhoneNo) missing.push('Phone No');
+    if (!form.Address) missing.push('Address');
+    if (!form.Pincode) missing.push('Pincode');
+    if (!form.Password) missing.push('Password');
+    if (missing.length) {
+      setMessage('Please provide: ' + missing.join(', '));
+      setSubmitting(false);
+      return;
     }
-  ];
+    try {
+      const payload = { ...form, PhoneNo: Number(form.PhoneNo), Pincode: Number(form.Pincode) };
+      await createUser(payload);
+      setMessage('User created successfully');
+      closeCreate();
+      loadUsers();
+    } catch (err) {
+      console.error('Create user failed', err);
+      const serverMsg = err?.response?.data?.error || err?.response?.data || err?.message;
+      setMessage(serverMsg || 'Failed to create user');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const getActionButtons = (status) => {
     if (status === 'Active' || status === 'Suspicious') {
@@ -87,15 +117,55 @@ const UserManagement = () => {
     }
   };
 
+  if (loading) return <div className="user-management-page">Loading users...</div>;
+  if (error) return <div className="user-management-page">Error: {error}</div>;
+
   return (
     <div className="user-management-page">
       {/* Page Header */}
       <div className="page-header-section">
-        <div>
-          <h1 className="page-title">User Management</h1>
-          <p className="page-subtitle">Manage job seeker accounts and profiles.</p>
-        </div>
+        <h1 className="page-title">User Management</h1>
+        <button className="btn btn-primary" onClick={openCreate}>
+          Add User
+        </button>
       </div>
+
+      {message && <div className="alert alert-info mt-2">{message}</div>}
+
+      {showCreate && (
+        <div className="create-user-form card p-3 mb-4">
+          <form onSubmit={handleCreate}>
+            <div className="mb-2">
+              <label className="form-label">Full Name</label>
+              <input name="FullName" value={form.FullName} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Email</label>
+              <input name="Email" value={form.Email} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Phone No</label>
+              <input name="PhoneNo" value={form.PhoneNo} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Address</label>
+              <input name="Address" value={form.Address} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Pincode</label>
+              <input name="Pincode" value={form.Pincode} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Password</label>
+              <input name="Password" type="password" value={form.Password} onChange={handleChange} className="form-control" required />
+            </div>
+            <div className="d-flex gap-2">
+              <button className="btn btn-success" type="submit" disabled={submitting}>{submitting ? 'Creating...' : 'Create'}</button>
+              <button className="btn btn-secondary" type="button" onClick={closeCreate}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Filters and Actions */}
       <div className="filters-bar mb-4">

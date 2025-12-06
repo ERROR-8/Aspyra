@@ -2,10 +2,13 @@ const Job = require(`../modules/job`);      //Job control API
 
 exports.createJob = async(req,res) => {
     try {
+        console.log('Create job payload:', req.body);
         const job = await Job.create(req.body);
-        res.json(job);
+        return res.status(201).json(job);
     } catch(err) {
-        res.json(err);
+        console.error('Create job error:', err);
+        const message = err && err.message ? err.message : 'Failed to create job';
+        return res.status(400).json({ error: message });
     }
 };
 

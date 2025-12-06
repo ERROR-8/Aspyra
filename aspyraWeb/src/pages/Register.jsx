@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowUp, FaPhone } from 'react-icons/fa';
 import './Register.css';
+import { register } from '../api/auth';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -31,10 +32,30 @@ const Register = () => {
       return;
     }
     
-    // Add your registration logic here
-    console.log('Registration attempt:', formData);
-    // For now, navigate to login
-    navigate('/login');
+    // Call backend register
+    (async () => {
+      try {
+        const payload = {
+          FullName: formData.fullName,
+          Email: formData.email,
+          Password: formData.password,
+          PhoneNo: formData.phone
+        };
+        const res = await register(payload);
+        if (res?.token) {
+          // registration returns token + user
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user || {}));
+          navigate('/');
+        } else {
+          navigate('/login');
+        }
+      } catch (err) {
+        console.error('Register error', err);
+        const msg = err?.response?.data?.error || err?.message || 'Registration failed';
+        alert(msg);
+      }
+    })();
   };
 
   const handleChange = (e) => {

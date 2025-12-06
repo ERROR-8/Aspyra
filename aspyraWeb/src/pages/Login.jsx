@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowUp } from 'react-icons/fa';
 import './Login.css';
+import { login } from '../api/auth';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,10 +15,24 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add your login logic here
-    console.log('Login attempt:', formData);
-    // For now, just navigate to home
-    navigate('/');
+    // Call backend login
+    (async () => {
+      try {
+        const payload = { Email: formData.email, Password: formData.password };
+        const res = await login(payload);
+        if (res?.token) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user || {}));
+          navigate('/');
+        } else {
+          alert('Login failed');
+        }
+      } catch (err) {
+        console.error('Login error', err);
+        const msg = err?.response?.data?.error || err?.message || 'Login failed';
+        alert(msg);
+      }
+    })();
   };
 
   const handleChange = (e) => {
