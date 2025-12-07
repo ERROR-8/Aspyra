@@ -38,13 +38,6 @@
   white-space: nowrap;
 }
 
-.logo-text-collapsed {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0;
-}
-
 .toggle-btn {
   color: #6b7280;
   padding: 0.5rem;

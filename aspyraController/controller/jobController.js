@@ -1,4 +1,4 @@
-const Job = require(`../modules/job`);      //Job control API
+const Job = require(`../modules/job`);
 
 exports.createJob = async(req,res) => {
     try {

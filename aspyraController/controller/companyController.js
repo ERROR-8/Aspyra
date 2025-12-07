@@ -1,4 +1,4 @@
-const Company = require(`../modules/company`);      //Company control API
+const Company = require(`../modules/company`);
 
 exports.createCompany = async(req,res) => {
     try{

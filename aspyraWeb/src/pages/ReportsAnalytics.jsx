@@ -120,7 +120,7 @@ const ReportsAnalytics = () => {
       {/* Page Header */}
       <div className="page-header-section mb-4">
         <h1 className="page-title">Reports & Analytics</h1>
-        <p className="page-subtitle">Track key metrics and generate reports.</p>
+        <p className="page-subtitle">Track key metrics...</p>
       </div>
 
       {/* Metrics Cards */}
@@ -146,23 +146,7 @@ const ReportsAnalytics = () => {
         ))}
       </div>
 
-      {/* Download Reports Section */}
-      <div className="reports-section mb-4">
-        <div className="reports-header">
-          <h3 className="section-title">Download Reports</h3>
-          <div className="download-buttons">
-            <button className="btn btn-pdf">
-              <FaFilePdf className="me-2" />
-              Download PDF
-            </button>
-            <button className="btn btn-excel">
-              <FaFileExcel className="me-2" />
-              Download Excel
-            </button>
-          </div>
-        </div>
-      </div>
-
+     
       {/* Recent Activity */}
       <div className="activity-section">
         <h3 className="section-title mb-3">Recent Activity</h3>

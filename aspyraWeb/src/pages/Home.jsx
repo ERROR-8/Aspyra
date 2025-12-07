@@ -11,7 +11,7 @@ const Home = () => {
       company: 'Google Inc.',
       logo: 'G',
       position: 'Software Engineer',
-      salary: '$120k - $150k',
+      salary: '₹120k - ₹150k',
       location: 'California, US'
     },
     {
@@ -19,7 +19,7 @@ const Home = () => {
       company: 'Amazon',
       logo: 'amazon',
       position: 'Product Manager',
-      salary: '$100k - $130k',
+      salary: '₹100k - ₹130k',
       location: 'Seattle, US'
     },
     {
@@ -27,7 +27,7 @@ const Home = () => {
       company: 'Netflix',
       logo: 'N',
       position: 'UI/UX Designer',
-      salary: '$90k - $110k',
+      salary: '₹90k - ₹110k',
       location: 'Los Gatos, US'
     }
   ];

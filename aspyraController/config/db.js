@@ -1,4 +1,4 @@
-const mongoose = require(`mongoose`);   //database connection
+const mongoose = require(`mongoose`);
 
 const connectdb = async() =>{
     try{

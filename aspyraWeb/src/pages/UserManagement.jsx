@@ -221,20 +221,7 @@ const UserManagement = () => {
         </div>
       )}
 
-      {/* Filters and Actions */}
-      <div className="filters-bar mb-4">
-        <h3 className="section-heading">Job Seekers List</h3>
-        <div className="filter-actions">
-          <button className="btn btn-outline-secondary btn-sm">
-            <FaFilter className="me-2" />
-            Filter
-          </button>
-          <button className="btn btn-outline-secondary btn-sm">
-            <FaSort className="me-2" />
-            Sort
-          </button>
-        </div>
-      </div>
+     
 
       {/* Users Table */}
       <div className="table-container">

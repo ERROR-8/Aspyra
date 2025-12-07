@@ -1,4 +1,4 @@
-const userSchema = require(`../modules/user`);      //User control API
+const userSchema = require(`../modules/user`);
 
 exports.createUser = async(req,res) =>{
     try{
@@ -39,6 +39,4 @@ exports.deleteUser = async(req,res) => {
         res.json(err);
     }
 };
-
-
 

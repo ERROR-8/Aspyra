@@ -19,7 +19,7 @@ const JobManagement = () => {
           description: j.JobDesc || j.description,
           company: j.CompanyName || j.company || '',
           location: j.Location || '',
-          salary: j.Salary ? `$${j.Salary}` : j.salary || '',
+          salary: j.Salary ? `₹${j.Salary}` : j.salary || '',
           type: j.JobsType || j.type || '',
           status: j.status || 'Active',
           statusColor: j.status === 'Approved' ? 'success' : (j.status === 'Rejected' ? 'danger' : 'warning')
@@ -43,7 +43,7 @@ const JobManagement = () => {
           description: j.JobDesc || j.description,
           company: j.CompanyName || j.company || '',
           location: j.Location || '',
-          salary: j.Salary ? `$${j.Salary}` : j.salary || '',
+          salary: j.Salary ? `₹${j.Salary}` : j.salary || '',
           type: j.JobsType || j.type || '',
           status: j.status || 'Active',
           statusColor: j.status === 'Approved' ? 'success' : (j.status === 'Rejected' ? 'danger' : 'warning')
@@ -230,41 +230,7 @@ const [editSubmitting, setEditSubmitting] = useState(false);  const openCreate =
         </div>
       )}
 
-      {/* Filters */}
-      <div className="filters-section mb-4">
-        <div className="row g-3">
-          <div className="col-md-3">
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Job Name"
-            />
-          </div>
-          <div className="col-md-3">
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Company"
-            />
-          </div>
-          <div className="col-md-3">
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Location"
-            />
-          </div>
-          <div className="col-md-3">
-            <select className="form-select">
-              <option>All Job Types</option>
-              <option>Full-time</option>
-              <option>Part-time</option>
-              <option>Contract</option>
-              <option>Internship</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Jobs Table */}
       <div className="table-container">
