@@ -41,6 +41,13 @@ const Register = () => {
           Password: formData.password,
           PhoneNo: formData.phone
         };
+        // map frontend userType to backend role
+        // 'employer' in UI should register as 'recruiter' role
+        if (formData.userType === 'employer') {
+          payload.role = 'recruiter';
+        } else {
+          payload.role = 'jobseeker';
+        }
         const res = await register(payload);
         if (res?.token) {
           // registration returns token + user
@@ -132,7 +139,7 @@ const Register = () => {
                 className={`user-type-btn ${formData.userType === 'employer' ? 'active' : ''}`}
                 onClick={() => setFormData(prev => ({ ...prev, userType: 'employer' }))}
               >
-                Employer
+                Recruiter
               </button>
             </div>
 

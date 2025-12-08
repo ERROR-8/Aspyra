@@ -2,6 +2,7 @@ import { FaPlus, FaCheck, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 import './JobManagement.css';
 import { useEffect, useState } from 'react';
 import { getJobs, createJob, updateJob, deleteJob } from '../api/jobs';
+import { isAdmin, isRecruiter, isJobSeeker, getCurrentUser, canEditItem } from '../utils/authUtils';
 
 const JobManagement = () => {
   const [jobs, setJobs] = useState([]);
@@ -13,7 +14,19 @@ const JobManagement = () => {
     getJobs()
       .then((data) => {
         // Map backend fields to frontend display fields if needed
-        const mapped = (data || []).map((j) => ({
+        let filtered = (data || []);
+        // For recruiter/jobseeker: show only own jobs (createdBy)
+        if (isRecruiter() || isJobSeeker()) {
+          const currentUser = getCurrentUser();
+          if (currentUser) {
+            filtered = filtered.filter(j => {
+              // createdBy may be an ObjectId or string; normalize both to string before comparing
+              const createdBy = j.createdBy ? String(j.createdBy) : '';
+              return createdBy === currentUser.id;
+            });
+          }
+        }
+        const mapped = filtered.map((j) => ({
           id: j._id || j.id,
           title: j.JobsName || j.title,
           description: j.JobDesc || j.description,
@@ -22,7 +35,8 @@ const JobManagement = () => {
           salary: j.Salary ? `₹${j.Salary}` : j.salary || '',
           type: j.JobsType || j.type || '',
           status: j.status || 'Active',
-          statusColor: j.status === 'Approved' ? 'success' : (j.status === 'Rejected' ? 'danger' : 'warning')
+          statusColor: j.status === 'Approved' ? 'success' : (j.status === 'Rejected' ? 'danger' : 'warning'),
+          createdBy: j.createdBy
         }));
         setJobs(mapped);
       })
@@ -37,7 +51,18 @@ const JobManagement = () => {
     setLoading(true);
     getJobs()
       .then((data) => {
-        const mapped = (data || []).map((j) => ({
+        let filtered = (data || []);
+        // For recruiter/jobseeker: show only own jobs
+        if (isRecruiter() || isJobSeeker()) {
+          const currentUser = getCurrentUser();
+          if (currentUser) {
+            filtered = filtered.filter(j => {
+              const createdBy = j.createdBy ? String(j.createdBy) : '';
+              return createdBy === currentUser.id;
+            });
+          }
+        }
+        const mapped = filtered.map((j) => ({
           id: j._id || j.id,
           title: j.JobsName || j.title,
           description: j.JobDesc || j.description,
@@ -46,7 +71,8 @@ const JobManagement = () => {
           salary: j.Salary ? `₹${j.Salary}` : j.salary || '',
           type: j.JobsType || j.type || '',
           status: j.status || 'Active',
-          statusColor: j.status === 'Approved' ? 'success' : (j.status === 'Rejected' ? 'danger' : 'warning')
+          statusColor: j.status === 'Approved' ? 'success' : (j.status === 'Rejected' ? 'danger' : 'warning'),
+          createdBy: j.createdBy
         }));
         setJobs(mapped);
       })
@@ -95,6 +121,9 @@ const [editSubmitting, setEditSubmitting] = useState(false);  const openCreate =
     try {
       // Ensure salary is number when sending
       const payload = { ...form, Salary: form.Salary ? Number(form.Salary) : 0 };
+      // Attach createdBy when current user is available so server records ownership reliably
+      const currentUser = getCurrentUser();
+      if (currentUser && currentUser.id) payload.createdBy = currentUser.id;
       const created = await createJob(payload);
       console.log('Create job response:', created);
       setMessage('Job created successfully');
@@ -183,10 +212,12 @@ const [editSubmitting, setEditSubmitting] = useState(false);  const openCreate =
       {/* Page Header */}
       <div className="page-header-section">
         <h1 className="page-title">Job Management</h1>
-        <button className="btn btn-primary" onClick={openCreate}>
-          <FaPlus className="me-2" />
-          Create Job Post
-        </button>
+        {(isAdmin() || isRecruiter()) && (
+          <button className="btn btn-primary" onClick={openCreate}>
+            <FaPlus className="me-2" />
+            Create Job Post
+          </button>
+        )}
       </div>
 
       {message && <div className="alert alert-info mt-2">{message}</div>}
@@ -312,12 +343,16 @@ const [editSubmitting, setEditSubmitting] = useState(false);  const openCreate =
                             </button>
                           </>
                         )}
-                        <button className="btn-icon btn-primary" title="Edit" onClick={() => startEdit(job)}>
-                          <FaEdit />
-                        </button>
-                        <button className="btn-icon btn-danger" title="Delete" onClick={() => handleDelete(job.id)}>
-                          <FaTrash />
-                        </button>
+                        {canEditItem(job.createdBy) && (
+                          <>
+                            <button className="btn-icon btn-primary" title="Edit" onClick={() => startEdit(job)}>
+                              <FaEdit />
+                            </button>
+                            <button className="btn-icon btn-danger" title="Delete" onClick={() => handleDelete(job.id)}>
+                              <FaTrash />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

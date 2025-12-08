@@ -5,9 +5,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import JobManagement from './pages/JobManagement';
+import JobList from './pages/JobList';
 import UserManagement from './pages/UserManagement';
 import CompanyProfiles from './pages/CompanyProfiles';
 import ReportsAnalytics from './pages/ReportsAnalytics';
+import Traking from './pages/Traking';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import './App.css';
@@ -27,6 +29,8 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/job-management" element={<JobManagement />} />
+              <Route path="/jobs" element={<JobList />} />
+              <Route path="/traking" element={<Traking />} />
               <Route path="/user-management" element={<UserManagement />} />
               <Route path="/company-profiles" element={<CompanyProfiles />} />
               <Route path="/reports" element={<ReportsAnalytics />} />

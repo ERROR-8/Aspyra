@@ -2,6 +2,7 @@ import { FaEye, FaEdit, FaBan, FaTimes, FaUserPlus, FaFilter, FaSort } from 'rea
 import './UserManagement.css';
 import { useEffect, useState } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../api/users';
+import { isAdmin, canEditUser, getCurrentUser } from '../utils/authUtils';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -17,6 +18,7 @@ const UserManagement = () => {
     PhoneNo: '',
     Address: '',
     Pincode: '',
+    role: 'jobseeker',
     Password: ''
   });
   const [message, setMessage] = useState(null);
@@ -29,7 +31,8 @@ const UserManagement = () => {
       Email: user.email,
       PhoneNo: user.phone,
       Address: user.location,
-      Pincode: ''
+      Pincode: '',
+      role: user.role || 'jobseeker'
     });
   };
 
@@ -61,7 +64,8 @@ const UserManagement = () => {
         Email: editForm.Email,
         PhoneNo: Number(editForm.PhoneNo),
         Address: editForm.Address,
-        Pincode: editForm.Pincode ? Number(editForm.Pincode) : undefined
+        Pincode: editForm.Pincode ? Number(editForm.Pincode) : undefined,
+        role: editForm.role || 'jobseeker'
       };
       await updateUser(editForm.id, payload);
       setMessage('User updated successfully');
@@ -97,6 +101,7 @@ const UserManagement = () => {
           location: u.Address || '',
           email: u.Email || '',
           phone: u.PhoneNo ? String(u.PhoneNo) : u.phone || '',
+          role: u.role || u.Role || 'jobseeker',
           status: 'Active',
           statusColor: 'success',
           avatar: (u.FullName && u.FullName.split(' ').map(n=>n[0]).slice(0,2).join('')) || 'U'
@@ -113,7 +118,7 @@ const UserManagement = () => {
   useEffect(() => { loadUsers(); }, []);
 
   const openCreate = () => { setMessage(null); setShowCreate(true); };
-  const closeCreate = () => { setShowCreate(false); setForm({ FullName: '', Email: '', PhoneNo: '', Address: '', Pincode: '', Password: '' }); };
+  const closeCreate = () => { setShowCreate(false); setForm({ FullName: '', Email: '', PhoneNo: '', Address: '', Pincode: '', role: 'jobseeker', Password: '' }); };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -138,7 +143,7 @@ const UserManagement = () => {
       return;
     }
     try {
-      const payload = { ...form, PhoneNo: Number(form.PhoneNo), Pincode: Number(form.Pincode) };
+      const payload = { ...form, PhoneNo: Number(form.PhoneNo), Pincode: Number(form.Pincode), role: form.role };
       await createUser(payload);
       setMessage('User created successfully');
       closeCreate();
@@ -153,18 +158,23 @@ const UserManagement = () => {
   };
 
   const getActionButtons = (user, status) => {
+    const canEdit = canEditUser(user.id);
     if (status === 'Active' || status === 'Suspicious') {
       return (
         <>
           <button className="btn-icon btn-primary" title="View Profile">
             <FaEye />
           </button>
-          <button className="btn-icon btn-warning" title="Edit" onClick={() => startEdit(user)}>
-            <FaEdit />
-          </button>
-          <button className="btn-icon btn-danger" title="Delete" onClick={() => handleDelete(user.id)}>
-            <FaBan />
-          </button>
+          {canEdit && (
+            <button className="btn-icon btn-warning" title="Edit" onClick={() => startEdit(user)}>
+              <FaEdit />
+            </button>
+          )}
+          {isAdmin() && (
+            <button className="btn-icon btn-danger" title="Delete" onClick={() => handleDelete(user.id)}>
+              <FaBan />
+            </button>
+          )}
         </>
       );
     }
@@ -209,6 +219,16 @@ const UserManagement = () => {
               <label className="form-label">Pincode</label>
               <input name="Pincode" value={form.Pincode} onChange={handleChange} className="form-control" required />
             </div>
+            {isAdmin() && (
+              <div className="mb-2">
+                <label className="form-label">Role</label>
+                <select name="role" value={form.role} onChange={handleChange} className="form-control">
+                  <option value="jobseeker">Job Seeker</option>
+                  <option value="recruiter">Recruiter</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            )}
             <div className="mb-2">
               <label className="form-label">Password</label>
               <input name="Password" type="password" value={form.Password} onChange={handleChange} className="form-control" required />
@@ -231,6 +251,7 @@ const UserManagement = () => {
               <tr>
                 <th>Full Name</th>
                 <th>Email</th>
+                <th>Role</th>
                 <th>Phone</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -240,7 +261,7 @@ const UserManagement = () => {
               {users.map(user => (
                 editingId === user.id ? (
                   <tr key={user.id} className="edit-row">
-                    <td colSpan="5">
+                    <td colSpan="6">
                       <form onSubmit={handleEditSubmit} className="edit-inline-form p-3">
                         <div className="row g-2">
                           <div className="col-md-2">
@@ -255,6 +276,16 @@ const UserManagement = () => {
                             <label className="form-label">Phone</label>
                             <input name="PhoneNo" value={editForm.PhoneNo} onChange={handleEditChange} className="form-control form-control-sm" required />
                           </div>
+                          {isAdmin() && (
+                            <div className="col-md-2">
+                              <label className="form-label">Role</label>
+                              <select name="role" value={editForm.role || 'jobseeker'} onChange={handleEditChange} className="form-control form-control-sm">
+                                <option value="jobseeker">Job Seeker</option>
+                                <option value="recruiter">Recruiter</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                            </div>
+                          )}
                           <div className="col-md-3">
                             <label className="form-label">Address</label>
                             <input name="Address" value={editForm.Address} onChange={handleEditChange} className="form-control form-control-sm" required />
@@ -285,6 +316,7 @@ const UserManagement = () => {
                     </div>
                   </td>
                   <td className="email-cell">{user.email}</td>
+                  <td><span className="badge bg-info">{user.role}</span></td>
                   <td>{user.phone}</td>
                   <td>
                     <span className={`badge status-badge status-${user.statusColor}`}>

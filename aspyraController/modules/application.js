@@ -7,6 +7,7 @@ const applicationSchema = new mongoose.Schema({
     Status : { type: String, required: true},
     AppliedDate: { type: String, required: true},
     UpdatedDate: { type: String, required: true},
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 module.exports = mongoose.model("Application",applicationSchema);

@@ -12,6 +12,7 @@ import {
   FaArrowUp,
   FaBars
 } from 'react-icons/fa';
+import { isAdmin, isRecruiter } from '../../utils/authUtils';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -20,11 +21,19 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/dashboard', icon: FaChartLine, label: 'Dashboard' },
-    { path: '/job-management', icon: FaBriefcase, label: 'Job Management' },
-    { path: '/company-profiles', icon: FaBuilding, label: 'Company Profiles' },
+    { path: '/jobs', icon: FaBriefcase, label: 'Job Listings' },
+    { path: '/job-management', icon: FaBriefcase, label: 'Job Management', requiresAdminOrRecruiter: true },
+    { path: '/traking', icon: FaFileAlt, label: 'Application & Traking' },
+    { path: '/company-profiles', icon: FaBuilding, label: 'Company Profiles', adminOnly: true },
     { path: '/user-management', icon: FaUsers, label: 'User Management' },
-    { path: '/reports', icon: FaChartBar, label: 'Reports & Analytics' },
+    { path: '/reports', icon: FaChartBar, label: 'Reports & Analytics', adminOnly: true },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.adminOnly) return isAdmin();
+    if (item.requiresAdminOrRecruiter) return isAdmin() || isRecruiter();
+    return true;
+  });
 
   const bottomMenuItems = [
     { path: '/settings', icon: FaCog, label: 'Settings' },
@@ -66,7 +75,7 @@ const Sidebar = () => {
       {/* Main Menu Items */}
       <nav className="sidebar-nav flex-grow-1">
         <ul className="nav flex-column">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <li key={item.path} className="nav-item">
               <Link
                 to={item.path}

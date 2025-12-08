@@ -3,6 +3,22 @@ const Job = require(`../modules/job`);
 exports.createJob = async(req,res) => {
     try {
         console.log('Create job payload:', req.body);
+        // If authorization token is provided, try to extract user id to set createdBy
+        try {
+            const authHeader = req.headers.authorization || '';
+            if (authHeader.startsWith('Bearer ')) {
+                const token = authHeader.split(' ')[1];
+                const jwt = require('jsonwebtoken');
+                const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded && decoded.id) {
+                    req.body.createdBy = decoded.id;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not set createdBy from token:', e.message || e);
+        }
+
         const job = await Job.create(req.body);
         return res.status(201).json(job);
     } catch(err) {
@@ -14,6 +30,23 @@ exports.createJob = async(req,res) => {
 
 exports.getJob = async(req,res) => {
     try {
+        // If requester is a recruiter, only return jobs created by them.
+        try {
+            const authHeader = req.headers.authorization || '';
+            if (authHeader.startsWith('Bearer ')) {
+                const token = authHeader.split(' ')[1];
+                const jwt = require('jsonwebtoken');
+                const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded && decoded.role === 'recruiter' && decoded.id) {
+                    const jobs = await Job.find({ createdBy: decoded.id });
+                    return res.json(jobs);
+                }
+            }
+        } catch (e) {
+            console.warn('Could not evaluate requester role for getJob:', e.message || e);
+        }
+        // default: return all jobs (admin and jobseekers)
         const job = await Job.find();
         res.json(job);
     } catch(err) {
