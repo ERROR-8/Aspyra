@@ -88,7 +88,7 @@ const Traking = () => {
   return (
     <div className="traking-page">
       <div className="page-header-section mb-4">
-        <h1 className="page-title">Traking</h1>
+        <h1 className="page-title">Tracking</h1>
         <p className="page-subtitle">Overview of application statuses</p>
       </div>
 
