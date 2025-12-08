@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FaHourglassHalf, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { getApplications, updateApplication } from '../api/applications';
 import { getJobs } from '../api/jobs';
-import { isRecruiter, getCurrentUser } from '../utils/authUtils';
+import { isRecruiter, isAdmin, getCurrentUser } from '../utils/authUtils';
 import './Traking.css';
 
 const Traking = () => {
@@ -52,12 +52,22 @@ const Traking = () => {
   };
 
   const canManageApplication = (app) => {
-    if (!isRecruiter()) return false;
     const currentUser = getCurrentUser();
     if (!currentUser) return false;
-    // try to find job by title and check createdBy
+    // Admins can manage all applications
+    if (isAdmin()) return true;
+    // Recruiters can manage only their own job applications
+    if (!isRecruiter()) return false;
+    
+    // For recruiters: try to find job by title and check createdBy
     const job = jobs.find(j => (j.JobsName || j.title) === app.JobTitle);
-    if (!job) return false;
+    if (!job) {
+      // Fallback: if backend already filtered the applications for this recruiter,
+      // we can show the button (backend enforces permission anyway)
+      console.warn(`Job not found for ${app.JobTitle}, but showing action button (recruiter-filtered data)`);
+      return true;
+    }
+    
     const jobOwner = job.createdBy ? String(job.createdBy) : '';
     return jobOwner === currentUser.id;
   };
