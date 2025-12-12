@@ -58,16 +58,9 @@ const Traking = () => {
     if (isAdmin()) return true;
     // Recruiters can manage only their own job applications
     if (!isRecruiter()) return false;
-    
-    // For recruiters: try to find job by title and check createdBy
+    // try to find job by title and check createdBy
     const job = jobs.find(j => (j.JobsName || j.title) === app.JobTitle);
-    if (!job) {
-      // Fallback: if backend already filtered the applications for this recruiter,
-      // we can show the button (backend enforces permission anyway)
-      console.warn(`Job not found for ${app.JobTitle}, but showing action button (recruiter-filtered data)`);
-      return true;
-    }
-    
+    if (!job) return false;
     const jobOwner = job.createdBy ? String(job.createdBy) : '';
     return jobOwner === currentUser.id;
   };
@@ -88,7 +81,7 @@ const Traking = () => {
   return (
     <div className="traking-page">
       <div className="page-header-section mb-4">
-        <h1 className="page-title">Tracking</h1>
+        <h1 className="page-title">Traking</h1>
         <p className="page-subtitle">Overview of application statuses</p>
       </div>
 

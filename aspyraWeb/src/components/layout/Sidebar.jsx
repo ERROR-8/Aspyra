@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from '../../context/SidebarContext';
 import { 
   FaChartLine, 
+  FaHome,
   FaBriefcase, 
   FaBuilding, 
   FaUsers, 
@@ -20,6 +21,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
+    { path: '/home', icon: FaHome, label: 'Home' },
     { path: '/dashboard', icon: FaChartLine, label: 'Dashboard' },
     { path: '/jobs', icon: FaBriefcase, label: 'Job Listings' },
     { path: '/job-management', icon: FaBriefcase, label: 'Job Management', requiresAdminOrRecruiter: true },

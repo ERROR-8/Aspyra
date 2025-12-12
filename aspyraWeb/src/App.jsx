@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import JobManagement from './pages/JobManagement';
 import JobList from './pages/JobList';
 import UserManagement from './pages/UserManagement';
@@ -27,6 +28,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/job-management" element={<JobManagement />} />
               <Route path="/jobs" element={<JobList />} />
