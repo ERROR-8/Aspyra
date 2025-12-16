@@ -1,6 +1,6 @@
 import { FaFileAlt, FaHourglass, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import './Dashboard.css';
 import { useEffect, useState } from 'react';
@@ -171,15 +171,15 @@ const Dashboard = () => {
             </div>
             <div className="chart-container">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
+                <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="month" stroke="#6b7280" />
                   <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="Applications" fill="#818cf8" radius={[8, 8, 0, 0]} />
-                  <Bar dataKey="Interviews" fill="#4ade80" radius={[8, 8, 0, 0]} />
-                </BarChart>
+                  <Line type="monotone" dataKey="Applications" stroke="#818cf8" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Interviews" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
