@@ -2,6 +2,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { useSidebar } from '../../context/SidebarContext';
 import './Layout.css';
+import Footer from './Footer';
 
 const Layout = ({ children }) => {
   const { isCollapsed } = useSidebar();
@@ -14,6 +15,7 @@ const Layout = ({ children }) => {
         <main className="content-area">
           {children}
         </main>
+        <Footer />
       </div>
     </div>
   );
