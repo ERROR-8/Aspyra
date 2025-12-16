@@ -8,16 +8,18 @@ const Layout = ({ children }) => {
   const { isCollapsed } = useSidebar();
 
   return (
-    <div className="app-container">
-      <Sidebar />
-      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
-        <Header />
-        <main className="content-area">
-          {children}
-        </main>
-        <Footer />
+    <>
+      <div className="app-container">
+        <Sidebar />
+        <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+          <Header />
+          <main className="content-area">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
