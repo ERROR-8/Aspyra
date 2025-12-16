@@ -13,7 +13,7 @@ const Home = () => {
     { path: '/job-management', label: 'Job Management', icon: FaBriefcase, desc: 'Create and manage jobs', requiresAdminOrRecruiter: true },
     { path: '/traking', label: 'Application & Tracking', icon: FaFileAlt, desc: 'Track application statuses' },
     { path: '/company-profiles', label: 'Company Profiles', icon: FaBuilding, desc: 'View company information', adminOnly: true },
-    { path: '/user-management', label: 'User Management', icon: FaUsers, desc: 'Manage system users' },
+    { path: '/user-management', label: 'User Management', icon: FaUsers, desc: 'Manage system users', adminOnly: true },
     { path: '/reports', label: 'Reports & Analytics', icon: FaChartBar, desc: 'View detailed reports', adminOnly: true },
   ];
 

@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { isAdmin } from './utils/authUtils';
 import { SidebarProvider } from './context/SidebarContext';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
@@ -33,7 +34,7 @@ function App() {
               <Route path="/job-management" element={<JobManagement />} />
               <Route path="/jobs" element={<JobList />} />
               <Route path="/traking" element={<Traking />} />
-              <Route path="/user-management" element={<UserManagement />} />
+              <Route path="/user-management" element={isAdmin() ? <UserManagement /> : <Navigate to="/" replace />} />
               <Route path="/company-profiles" element={<CompanyProfiles />} />
               <Route path="/reports" element={<ReportsAnalytics />} />
               <Route path="/settings" element={<Settings />} />

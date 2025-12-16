@@ -27,7 +27,7 @@ const Sidebar = () => {
     { path: '/job-management', icon: FaBriefcase, label: 'Job Management', requiresAdminOrRecruiter: true },
     { path: '/traking', icon: FaFileAlt, label: 'Application & Traking' },
     { path: '/company-profiles', icon: FaBuilding, label: 'Company Profiles', adminOnly: true },
-    { path: '/user-management', icon: FaUsers, label: 'User Management' },
+    { path: '/user-management', icon: FaUsers, label: 'User Management', adminOnly: true },
     { path: '/reports', icon: FaChartBar, label: 'Reports & Analytics', adminOnly: true },
   ];
 

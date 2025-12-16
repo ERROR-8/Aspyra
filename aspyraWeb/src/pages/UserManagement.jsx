@@ -1,8 +1,10 @@
 import { FaEye, FaEdit, FaBan, FaTimes, FaUserPlus, FaFilter, FaSort } from 'react-icons/fa';
 import './UserManagement.css';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getUsers, createUser, updateUser, deleteUser } from '../api/users';
 import { isAdmin, canEditUser, getCurrentUser } from '../utils/authUtils';
+import { Navigate } from 'react-router-dom';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -115,7 +117,21 @@ const UserManagement = () => {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { loadUsers(); }, []);
+  useEffect(() => { if (isAdmin()) loadUsers(); }, []);
+
+  // Prevent non-admin users from accessing this page directly
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isAdmin()) {
+      // redirect non-admin users to home (hides page access)
+      navigate('/home');
+    }
+  }, [navigate]);
+  // Prevent non-admins from accessing this page
+  if (!isAdmin()) {
+    // Immediately navigate non-admins to home
+    return <Navigate to="/home" replace />;
+  }
 
   const openCreate = () => { setMessage(null); setShowCreate(true); };
   const closeCreate = () => { setShowCreate(false); setForm({ FullName: '', Email: '', PhoneNo: '', Address: '', Pincode: '', role: 'jobseeker', Password: '' }); };
@@ -189,9 +205,11 @@ const UserManagement = () => {
       {/* Page Header */}
       <div className="page-header-section">
         <h1 className="page-title">User Management</h1>
-        <button className="btn btn-primary" onClick={openCreate}>
-          Add User
-        </button>
+        {isAdmin() && (
+          <button className="btn btn-primary" onClick={openCreate}>
+            Add User
+          </button>
+        )}
       </div>
 
       {message && <div className="alert alert-info mt-2">{message}</div>}
