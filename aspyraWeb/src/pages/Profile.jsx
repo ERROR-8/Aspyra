@@ -201,169 +201,125 @@ const Profile = () => {
   }
 
   return (
-    <div className="profile-page">
-      {/* Page Header with Edit Button */}
-      <div className="profile-header-section">
+    <main className="profile-page">
+      <header className="profile-header-section">
         <h1 className="page-title">User Profile</h1>
         {!isEditing ? (
-          <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
-            <FaEdit className="me-2" />
+          <button className="btn btn-primary" type="button" onClick={() => setIsEditing(true)} aria-label="Edit profile">
+            <FaEdit className="me-2" aria-hidden="true" />
             Edit Profile
           </button>
         ) : (
-          <div className="btn-group gap-2">
-            <button className="btn btn-success" onClick={handleSaveProfile} disabled={saving}>
-              <FaSave className="me-2" />
+          <div className="btn-group gap-2" role="group" aria-label="Profile edit actions">
+            <button className="btn btn-success" type="button" onClick={handleSaveProfile} disabled={saving} aria-disabled={saving} aria-label="Save profile">
+              <FaSave className="me-2" aria-hidden="true" />
               {saving ? 'Saving...' : 'Save'}
             </button>
-            <button className="btn btn-secondary" onClick={() => setIsEditing(false)} disabled={saving}>
-              <FaTimes className="me-2" />
+            <button className="btn btn-secondary" type="button" onClick={() => setIsEditing(false)} disabled={saving} aria-label="Cancel editing">
+              <FaTimes className="me-2" aria-hidden="true" />
               Cancel
             </button>
           </div>
         )}
-      </div>
+      </header>
 
       {message && (
-        <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-danger'} mt-2`}>
+        <div role="status" aria-live="polite" className={`alert ${message.includes('success') ? 'alert-success' : 'alert-danger'} mt-2`}>
           {message}
         </div>
       )}
 
-      <div className="row g-4">
-        {/* Left Column - User Info Card */}
-        <div className="col-lg-4">
+      <section className="profile-grid" aria-labelledby="profile-overview">
+        <aside className="profile-sidebar" aria-label="User summary">
+          <div className="avatar-wrapper" role="img" aria-label={`Avatar for ${userInfo.name}`}>
+            <FaUserCircle className="profile-avatar-large" aria-hidden="true" />
+          </div>
+          <h2 id="profile-overview" className="profile-name">{userInfo.name}</h2>
+          <p className="profile-title">{userInfo.title}</p>
+          <p className="profile-company">{userInfo.company}</p>
+          <p className="profile-bio">{userInfo.bio}</p>
+        </aside>
+
+        <div className="profile-main">
           {isEditing ? (
-          return (
-            <main className="profile-page">
-              <header className="profile-header-section">
-                <h1 className="page-title">User Profile</h1>
-                {!isEditing ? (
-                  <button className="btn btn-primary" type="button" onClick={() => setIsEditing(true)} aria-label="Edit profile">
-                    <FaEdit className="me-2" aria-hidden="true" />
-                    Edit Profile
-                  </button>
-                ) : (
-                  <div className="btn-group gap-2" role="group" aria-label="Profile edit actions">
-                    <button className="btn btn-success" type="button" onClick={handleSaveProfile} disabled={saving} aria-disabled={saving} aria-label="Save profile">
-                      <FaSave className="me-2" aria-hidden="true" />
-                      {saving ? 'Saving...' : 'Save'}
-                    </button>
-                    <button className="btn btn-secondary" type="button" onClick={() => setIsEditing(false)} disabled={saving} aria-label="Cancel editing">
-                      <FaTimes className="me-2" aria-hidden="true" />
-                      Cancel
-                    </button>
-                  </div>
-                )}
-              </header>
-
-              <div role="status" aria-live="polite">{message && (
-                <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-danger'} mt-2`}>
-                  {message}
-                </div>
-              )}</div>
-
-              <section className="profile-grid" aria-labelledby="profile-overview">
-                <aside className="profile-sidebar" aria-label="User summary">
-                  <div className="avatar-wrapper" role="img" aria-label={`Avatar for ${userInfo.name}`}>
-                    <FaUserCircle className="profile-avatar-large" aria-hidden="true" />
-                  </div>
-                  <h2 id="profile-overview" className="profile-name">{userInfo.name}</h2>
-                  <p className="profile-title">{userInfo.title}</p>
-                  <p className="profile-company">{userInfo.company}</p>
-                  <p className="profile-bio">{userInfo.bio}</p>
-                </aside>
-
-                <div className="profile-main">
-                  {isEditing ? (
-                    <form className="edit-form" onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} aria-label="Edit profile form">
-                      <div className="form-row">
-                        <label htmlFor="fullName" className="form-label">Full Name</label>
-                        <input id="fullName" name="FullName" aria-required="true" className="form-control" value={editForm.FullName} onChange={handleEditChange} />
-                      </div>
-
-                      <div className="form-row">
-                        <label htmlFor="email" className="form-label">Email</label>
-                        <input id="email" name="Email" type="email" aria-required="true" className="form-control" value={editForm.Email} onChange={handleEditChange} />
-                      </div>
-
-                      <div className="form-row">
-                        <label htmlFor="phone" className="form-label">Phone</label>
-                        <input id="phone" name="PhoneNo" className="form-control" value={editForm.PhoneNo} onChange={handleEditChange} />
-                      </div>
-
-                      <div className="form-row">
-                        <label htmlFor="address" className="form-label">Address</label>
-                        <input id="address" name="Address" className="form-control" value={editForm.Address} onChange={handleEditChange} />
-                      </div>
-
-                      <div className="form-row">
-                        <label htmlFor="pincode" className="form-label">Pincode</label>
-                        <input id="pincode" name="Pincode" className="form-control" value={editForm.Pincode} onChange={handleEditChange} />
-                      </div>
-
-                      <hr />
-
-                      <div className="form-row">
-                        <button className="btn btn-primary" type="submit" disabled={saving} aria-disabled={saving}>{saving ? 'Saving...' : 'Save changes'}</button>
-                        <button className="btn btn-secondary" type="button" onClick={() => setIsEditing(false)}>Cancel</button>
-                      </div>
-
-                      <div className="password-section">
-                        <button className="btn btn-outline-secondary" type="button" onClick={() => setShowPasswordForm(prev => !prev)} aria-expanded={showPasswordForm} aria-controls="password-form">Change Password</button>
-
-                        {showPasswordForm && (
-                          <div id="password-form" className="password-change-section" aria-live="polite">
-                            <div className="mb-3">
-                              <label htmlFor="currentPassword" className="form-label">Current Password</label>
-                              <input id="currentPassword" type="password" className="form-control" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="newPassword" className="form-label">New Password</label>
-                              <input id="newPassword" type="password" className="form-control" value={passwordForm.newPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
-                              <input id="confirmPassword" type="password" className="form-control" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))} />
-                            </div>
-                            {passwordMessage && <div role="status" className={`alert ${passwordMessage.includes('success') ? 'alert-success' : 'alert-danger'} mt-2`}>{passwordMessage}</div>}
-                            <div className="d-flex gap-2">
-                              <button className="btn btn-primary" onClick={handlePasswordChange} disabled={changingPassword} type="button">{changingPassword ? 'Changing...' : 'Change Password'}</button>
-                              <button className="btn btn-secondary" onClick={() => { setShowPasswordForm(false); setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); setPasswordMessage(null); }} type="button">Cancel</button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="profile-info" aria-label="Profile details">
-                      <div className="info-row">
-                        <label className="info-label">Email</label>
-                        <div className="info-value">{userInfo.email}</div>
-                      </div>
-                      <div className="info-row">
-                        <label className="info-label">Phone</label>
-                        <div className="info-value">{userInfo.phone}</div>
-                      </div>
-                      <div className="info-row">
-                        <label className="info-label">Location</label>
-                        <div className="info-value">{userInfo.location}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </section>
-            </main>
+            <form className="edit-form" onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} aria-label="Edit profile form">
+              <div className="form-row">
+                <label htmlFor="fullName" className="form-label">Full Name</label>
+                <input id="fullName" name="FullName" aria-required="true" className="form-control" value={editForm.FullName} onChange={handleEditChange} />
               </div>
 
-             
-            </>
+              <div className="form-row">
+                <label htmlFor="email" className="form-label">Email</label>
+                <input id="email" name="Email" type="email" aria-required="true" className="form-control" value={editForm.Email} onChange={handleEditChange} />
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="phone" className="form-label">Phone</label>
+                <input id="phone" name="PhoneNo" className="form-control" value={editForm.PhoneNo} onChange={handleEditChange} />
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="address" className="form-label">Address</label>
+                <input id="address" name="Address" className="form-control" value={editForm.Address} onChange={handleEditChange} />
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="pincode" className="form-label">Pincode</label>
+                <input id="pincode" name="Pincode" className="form-control" value={editForm.Pincode} onChange={handleEditChange} />
+              </div>
+
+              <hr />
+
+              <div className="form-row">
+                <button className="btn btn-primary" type="submit" disabled={saving} aria-disabled={saving}>{saving ? 'Saving...' : 'Save changes'}</button>
+                <button className="btn btn-secondary" type="button" onClick={() => setIsEditing(false)}>Cancel</button>
+              </div>
+
+              <div className="password-section">
+                <button className="btn btn-outline-secondary" type="button" onClick={() => setShowPasswordForm(prev => !prev)} aria-expanded={showPasswordForm} aria-controls="password-form">Change Password</button>
+
+                {showPasswordForm && (
+                  <div id="password-form" className="password-change-section" aria-live="polite">
+                    <div className="mb-3">
+                      <label htmlFor="currentPassword" className="form-label">Current Password</label>
+                      <input id="currentPassword" type="password" className="form-control" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="newPassword" className="form-label">New Password</label>
+                      <input id="newPassword" type="password" className="form-control" value={passwordForm.newPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
+                      <input id="confirmPassword" type="password" className="form-control" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))} />
+                    </div>
+                    {passwordMessage && <div role="status" className={`alert ${passwordMessage.includes('success') ? 'alert-success' : 'alert-danger'} mt-2`}>{passwordMessage}</div>}
+                    <div className="d-flex gap-2">
+                      <button className="btn btn-primary" onClick={handlePasswordChange} disabled={changingPassword} type="button">{changingPassword ? 'Changing...' : 'Change Password'}</button>
+                      <button className="btn btn-secondary" onClick={() => { setShowPasswordForm(false); setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); setPasswordMessage(null); }} type="button">Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </form>
+          ) : (
+            <div className="profile-info" aria-label="Profile details">
+              <div className="info-row">
+                <label className="info-label">Email</label>
+                <div className="info-value">{userInfo.email}</div>
+              </div>
+              <div className="info-row">
+                <label className="info-label">Phone</label>
+                <div className="info-value">{userInfo.phone}</div>
+              </div>
+              <div className="info-row">
+                <label className="info-label">Location</label>
+                <div className="info-value">{userInfo.location}</div>
+              </div>
+            </div>
           )}
         </div>
-
-       
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

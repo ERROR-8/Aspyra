@@ -99,9 +99,8 @@ const Sidebar = () => {
             <li key={item.path} className="nav-item">
               <Link
                 to={item.path}
-                className={`nav-link fixed-action settings ${isActive(item.path) ? 'active' : ''}`}
+                className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
                 title={isCollapsed ? item.label : ''}
-                aria-label={item.label}
               >
                 <item.icon className="nav-icon" />
                 {!isCollapsed && <span className="nav-text">{item.label}</span>}
@@ -112,9 +111,8 @@ const Sidebar = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="nav-link btn-logout fixed-action logout"
+              className="nav-link btn-logout"
               title={isCollapsed ? 'Log out' : ''}
-              aria-label="Log out"
             >
               <FaSignOutAlt className="nav-icon" />
               {!isCollapsed && <span className="nav-text">Log out</span>}
